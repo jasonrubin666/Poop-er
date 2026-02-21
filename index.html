@@ -284,7 +284,7 @@ let hiScore = parseInt(localStorage.getItem('pooper-hi') || '0');
 let lives = 3;
 let deathTimer = 0;
 let scrollOffset = 0;
-let targetScrollSpeed = 0.4;
+let targetScrollSpeed = 0.2;
 let furthestRow = 0;
 let rowsGenerated = 0;
 let lanes = [];
@@ -732,7 +732,7 @@ function generateLane(rowIndex) {
 
   if (Math.random() < 0.55) {
     const dir = Math.random() < 0.5 ? 1 : -1;
-    const speed = (0.5 + Math.random()*1.5 + difficulty*1.0) * dir;
+    const speed = (0.25 + Math.random()*0.75 + difficulty*0.5) * dir;
     const n = 2 + Math.floor(Math.random()*3 + difficulty*2);
     const obs = [];
     for (let i = 0; i < n; i++) {
@@ -741,7 +741,7 @@ function generateLane(rowIndex) {
     return { type:'road', row:rowIndex, color:'#444', lineColor:'#666', obstacles:obs, speed, direction:dir };
   } else {
     const dir = Math.random() < 0.5 ? 1 : -1;
-    const speed = (0.3 + Math.random()*1.0 + difficulty*0.5) * dir;
+    const speed = (0.15 + Math.random()*0.5 + difficulty*0.25) * dir;
     const n = 2 + Math.floor(Math.random()*2);
     const plats = [];
     for (let i = 0; i < n; i++) {
@@ -1022,7 +1022,7 @@ function update() {
   const ts = (player.row - VISIBLE_ROWS*0.35)*TILE;
   if (ts > scrollOffset) scrollOffset += (ts-scrollOffset)*0.1;
   scrollOffset += targetScrollSpeed;
-  targetScrollSpeed = 0.4 + Math.min(score/4000, 1.0);
+  targetScrollSpeed = 0.2 + Math.min(score/4000, 0.5);
   if (screenY(player.row) > GH+TILE && !player.dead) killPlayer();
   checkCollisions();
   if (player.dead) {
@@ -1042,7 +1042,7 @@ function update() {
 function gameLoop() { update(); render(); requestAnimationFrame(gameLoop); }
 
 function startGame() {
-  score = 0; lives = 3; furthestRow = 0; scrollOffset = -TILE*4; targetScrollSpeed = 0.4; rowsGenerated = 0;
+  score = 0; lives = 3; furthestRow = 0; scrollOffset = -TILE*4; targetScrollSpeed = 0.2; rowsGenerated = 0;
   lanes = []; particles = []; deathTimer = 0;
   player = { col: 6, row: 0, x: 0, y: 0, riding: null, dead: false };
   for (let i = 0; i < VISIBLE_ROWS+20; i++) { lanes.push(generateLane(i)); rowsGenerated = i+1; }
