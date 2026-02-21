@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pooper-v1';
+const CACHE_NAME = 'pooper-v2';
 const ASSETS = [
   './',
   './index.html',
