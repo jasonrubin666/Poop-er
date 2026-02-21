@@ -2,73 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POOP-ER - The Infinite Frogger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>POOP-ER</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
+html, body {
+  width: 100%;
+  height: 100%;
   background: #0a0a0a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
   font-family: 'Press Start 2P', monospace;
   overflow: hidden;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   image-rendering: pixelated;
 }
 
-#game-wrapper {
-  position: relative;
-  border: 4px solid #ffcc00;
-  box-shadow: 0 0 20px #ffcc0066, 0 0 60px #ffcc0022;
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-canvas {
+/* ---- GAME CANVAS AREA ---- */
+#game-area {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#game-area canvas {
   display: block;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #ffcc00;
+  box-shadow: 0 0 15px #ffcc0044;
 }
 
-#ui-overlay {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 10;
-}
+/* ---- HUD (lives, score) drawn on canvas ---- */
 
-#score-display {
-  position: absolute;
-  top: 8px; left: 8px;
-  color: #ffcc00;
-  font-size: 10px;
-  text-shadow: 2px 2px #000;
-  z-index: 11;
-}
-
-#hi-score-display {
-  position: absolute;
-  top: 8px; right: 8px;
-  color: #ff6600;
-  font-size: 10px;
-  text-shadow: 2px 2px #000;
-  z-index: 11;
-}
-
-#lives-display {
-  position: absolute;
-  top: 24px; left: 8px;
-  color: #ff4444;
-  font-size: 10px;
-  text-shadow: 2px 2px #000;
-  z-index: 11;
-}
-
-#title-screen, #game-over-screen {
+/* ---- TITLE / GAME-OVER OVERLAYS ---- */
+.overlay {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
@@ -76,192 +60,224 @@ canvas {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.88);
   z-index: 20;
-  pointer-events: all;
+  cursor: pointer;
 }
 
-#title-screen h1 {
-  font-size: 28px;
-  color: #8B6914;
-  text-shadow: 3px 3px #000, -1px -1px #ffcc00;
-  margin-bottom: 10px;
-  animation: pulse 1.5s infinite;
-}
+.overlay.hidden { display: none; }
 
-#title-screen .subtitle {
-  font-size: 9px;
-  color: #ffcc00;
-  margin-bottom: 30px;
-}
-
-#title-screen .poop-art {
-  font-size: 48px;
-  margin-bottom: 20px;
+.overlay .poop-art {
+  font-size: min(15vw, 64px);
+  margin-bottom: 12px;
   animation: bounce 0.8s infinite alternate;
 }
 
-.blink {
-  font-size: 11px;
-  color: #fff;
-  animation: blink 1s infinite;
-  margin-top: 20px;
+.overlay h1 {
+  font-size: min(8vw, 32px);
+  color: #8B6914;
+  text-shadow: 3px 3px #000, -1px -1px #ffcc00;
+  margin-bottom: 6px;
+  animation: pulse 1.5s infinite;
 }
 
-.controls-info {
-  font-size: 7px;
-  color: #888;
-  margin-top: 15px;
-  text-align: center;
-  line-height: 1.8;
+.overlay .subtitle {
+  font-size: min(2.5vw, 10px);
+  color: #ffcc00;
+  margin-bottom: 24px;
 }
 
-#game-over-screen h2 {
-  font-size: 22px;
+.overlay h2 {
+  font-size: min(7vw, 26px);
   color: #ff4444;
   text-shadow: 2px 2px #000;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
-#game-over-screen .final-score {
-  font-size: 12px;
+.overlay .final-score {
+  font-size: min(3.5vw, 14px);
   color: #ffcc00;
   margin-bottom: 8px;
 }
 
-#game-over-screen .new-hi {
-  font-size: 10px;
+.overlay .new-hi {
+  font-size: min(3vw, 12px);
   color: #ff6600;
   animation: pulse 0.5s infinite;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+}
+
+.blink {
+  font-size: min(3vw, 12px);
+  color: #fff;
+  animation: blink 1s infinite;
+  margin-top: 16px;
+  padding: 12px 20px;
+}
+
+.controls-info {
+  font-size: min(2vw, 8px);
+  color: #888;
+  margin-top: 14px;
+  text-align: center;
+  line-height: 2;
 }
 
 @keyframes blink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
-
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
-
 @keyframes bounce {
   from { transform: translateY(0); }
-  to { transform: translateY(-10px); }
+  to { transform: translateY(-8px); }
 }
 
-/* Mobile controls */
-#mobile-controls {
-  display: none;
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 15;
-  pointer-events: all;
-}
-
-.d-pad {
+/* ---- D-PAD (always visible, below canvas) ---- */
+#controls {
+  flex-shrink: 0;
   display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   grid-template-areas:
     ". up ."
     "left . right"
     ". down .";
-  gap: 4px;
+  gap: 6px;
+  padding: 10px;
+  width: min(260px, 55vw);
+  height: min(260px, 55vw);
+  margin-top: 8px;
 }
 
-.d-pad button {
-  width: 48px; height: 48px;
-  background: rgba(255,204,0,0.3);
-  border: 2px solid #ffcc00;
+#controls button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 3px solid #ffcc00;
+  border-radius: 8px;
+  background: rgba(255,204,0,0.15);
   color: #ffcc00;
-  font-size: 18px;
   font-family: 'Press Start 2P', monospace;
-  cursor: pointer;
-  pointer-events: all;
+  font-size: min(5vw, 22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
 }
 
-.d-pad button:active {
-  background: rgba(255,204,0,0.6);
+#controls button:active,
+#controls button.pressed {
+  background: rgba(255,204,0,0.5);
+  box-shadow: 0 0 10px #ffcc0066;
 }
 
-#btn-up { grid-area: up; }
-#btn-down { grid-area: down; }
-#btn-left { grid-area: left; }
+#btn-up    { grid-area: up; }
+#btn-down  { grid-area: down; }
+#btn-left  { grid-area: left; }
 #btn-right { grid-area: right; }
 
-@media (pointer: coarse) {
-  #mobile-controls { display: block; }
+/* ---- KEYBOARD-ONLY: hide d-pad if fine pointer ---- */
+@media (pointer: fine) and (hover: hover) {
+  #controls { display: none; }
 }
 </style>
 </head>
 <body>
 
-<div id="game-wrapper">
+<!-- Game canvas (sized by JS) -->
+<div id="game-area">
   <canvas id="game"></canvas>
-  <div id="ui-overlay">
-    <div id="score-display">SCORE: 0</div>
-    <div id="hi-score-display">HI: 0</div>
-    <div id="lives-display"></div>
 
-    <div id="title-screen">
-      <div class="poop-art">💩</div>
-      <h1>POOP-ER</h1>
-      <div class="subtitle">~ THE INFINITE FROGGER ~</div>
-      <div class="blink">PRESS SPACE OR TAP TO START</div>
-      <div class="controls-info">
-        ARROW KEYS / WASD TO MOVE<br>
-        CROSS ROADS AND PEE RIVERS<br>
-        AVOID TOILETS - RIDE TOILET PAPER
-      </div>
-    </div>
-
-    <div id="game-over-screen" style="display:none;">
-      <h2>FLUSHED!</h2>
-      <div class="final-score" id="final-score">SCORE: 0</div>
-      <div class="new-hi" id="new-hi" style="display:none;">NEW HIGH SCORE!</div>
-      <div class="blink">PRESS SPACE OR TAP TO RETRY</div>
+  <div class="overlay" id="title-screen">
+    <div class="poop-art">💩</div>
+    <h1>POOP-ER</h1>
+    <div class="subtitle">~ THE INFINITE FROGGER ~</div>
+    <div class="blink">TAP TO START</div>
+    <div class="controls-info">
+      SWIPE OR D-PAD TO MOVE<br>
+      CROSS ROADS & PEE RIVERS<br>
+      AVOID TOILETS &bull; RIDE TOILET PAPER
     </div>
   </div>
 
-  <div id="mobile-controls">
-    <div class="d-pad">
-      <button id="btn-up">^</button>
-      <button id="btn-left">&lt;</button>
-      <button id="btn-right">&gt;</button>
-      <button id="btn-down">v</button>
-    </div>
+  <div class="overlay hidden" id="game-over-screen">
+    <h2>FLUSHED!</h2>
+    <div class="final-score" id="final-score">SCORE: 0</div>
+    <div class="new-hi hidden" id="new-hi">NEW HIGH SCORE!</div>
+    <div class="blink">TAP TO RETRY</div>
   </div>
+</div>
+
+<!-- D-Pad (below the game canvas, outside it) -->
+<div id="controls">
+  <button id="btn-up" aria-label="Up">&#9650;</button>
+  <button id="btn-left" aria-label="Left">&#9664;</button>
+  <button id="btn-right" aria-label="Right">&#9654;</button>
+  <button id="btn-down" aria-label="Down">&#9660;</button>
 </div>
 
 <script>
 // ============================================================
-// POOP-ER: Infinite Frogger with Poop Emoji
-// 80s Pixel Art Style
+// POOP-ER  –  Infinite Frogger  –  Mobile-First
 // ============================================================
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-// Game constants
+// ---------- responsive sizing ----------
 const TILE = 32;
 const COLS = 13;
 const VISIBLE_ROWS = 16;
-const W = COLS * TILE;
-const H = VISIBLE_ROWS * TILE;
-canvas.width = W;
-canvas.height = H;
+const GW = COLS * TILE;        // internal game width  (416)
+const GH = VISIBLE_ROWS * TILE; // internal game height (512)
+canvas.width = GW;
+canvas.height = GH;
 
-// State
-let gameState = 'title'; // title, playing, dead, gameover
+function resize() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Compute available height: subtract d-pad (if visible) + padding
+  const controlsEl = document.getElementById('controls');
+  const controlsVisible = getComputedStyle(controlsEl).display !== 'none';
+  const controlsH = controlsVisible ? Math.min(260, vw * 0.55) + 28 : 0;
+  const safeTop = parseInt(getComputedStyle(document.body).paddingTop) || 0;
+  const safeBot = parseInt(getComputedStyle(document.body).paddingBottom) || 0;
+  const availH = vh - controlsH - safeTop - safeBot - 8;
+  const availW = vw - 12;
+
+  // Scale canvas to fit, preserving aspect ratio
+  const aspect = GW / GH;
+  let drawW, drawH;
+  if (availW / availH > aspect) {
+    drawH = availH;
+    drawW = drawH * aspect;
+  } else {
+    drawW = availW;
+    drawH = drawW / aspect;
+  }
+
+  const area = document.getElementById('game-area');
+  area.style.width = drawW + 'px';
+  area.style.height = drawH + 'px';
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+resize();
+
+// ---------- state ----------
+let gameState = 'title';
 let score = 0;
 let hiScore = parseInt(localStorage.getItem('pooper-hi') || '0');
 let lives = 3;
 let deathTimer = 0;
 let scrollOffset = 0;
-let scrollSpeed = 0;
 let targetScrollSpeed = 0.4;
 let furthestRow = 0;
 let rowsGenerated = 0;
@@ -270,229 +286,165 @@ let player = { col: 6, row: 0, x: 0, y: 0, riding: null, dead: false };
 let particles = [];
 let frameCount = 0;
 
-// Audio context for retro sounds
+// ---------- audio ----------
 let audioCtx = null;
 function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // iOS requires resume inside a user gesture
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
 }
 
 function playSound(type) {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  const t = audioCtx.currentTime;
-
-  switch(type) {
-    case 'hop':
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(200, t);
-      osc.frequency.linearRampToValueAtTime(400, t + 0.08);
-      gain.gain.setValueAtTime(0.15, t);
-      gain.gain.linearRampToValueAtTime(0, t + 0.1);
-      osc.start(t); osc.stop(t + 0.1);
-      break;
-    case 'die':
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(400, t);
-      osc.frequency.linearRampToValueAtTime(80, t + 0.4);
-      gain.gain.setValueAtTime(0.2, t);
-      gain.gain.linearRampToValueAtTime(0, t + 0.4);
-      osc.start(t); osc.stop(t + 0.4);
-      break;
-    case 'score':
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(440, t);
-      osc.frequency.setValueAtTime(550, t + 0.08);
-      osc.frequency.setValueAtTime(660, t + 0.16);
-      gain.gain.setValueAtTime(0.12, t);
-      gain.gain.linearRampToValueAtTime(0, t + 0.25);
-      osc.start(t); osc.stop(t + 0.25);
-      break;
-    case 'gameover':
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(300, t);
-      osc.frequency.linearRampToValueAtTime(100, t + 0.3);
-      osc.frequency.setValueAtTime(250, t + 0.35);
-      osc.frequency.linearRampToValueAtTime(50, t + 0.7);
-      gain.gain.setValueAtTime(0.2, t);
-      gain.gain.linearRampToValueAtTime(0, t + 0.7);
-      osc.start(t); osc.stop(t + 0.7);
-      break;
-  }
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const t = audioCtx.currentTime;
+    switch (type) {
+      case 'hop':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, t);
+        osc.frequency.linearRampToValueAtTime(400, t + 0.08);
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.1);
+        osc.start(t); osc.stop(t + 0.1);
+        break;
+      case 'die':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.linearRampToValueAtTime(80, t + 0.4);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.4);
+        osc.start(t); osc.stop(t + 0.4);
+        break;
+      case 'score':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.setValueAtTime(550, t + 0.08);
+        osc.frequency.setValueAtTime(660, t + 0.16);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.25);
+        osc.start(t); osc.stop(t + 0.25);
+        break;
+      case 'gameover':
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.linearRampToValueAtTime(100, t + 0.3);
+        osc.frequency.setValueAtTime(250, t + 0.35);
+        osc.frequency.linearRampToValueAtTime(50, t + 0.7);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.7);
+        osc.start(t); osc.stop(t + 0.7);
+        break;
+    }
+  } catch (_) { /* ignore audio errors */ }
 }
 
 // ============================================================
-// PIXEL ART SPRITE DRAWING
+// PIXEL ART SPRITES
 // ============================================================
 
 function drawPixelPoop(x, y, size) {
   const s = size / 8;
-  ctx.save();
-
-  // Main brown body
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(x + 2*s, y + 5*s, 4*s, 3*s);
-  ctx.fillRect(x + 1*s, y + 6*s, 6*s, 2*s);
-
-  // Middle swirl
+  ctx.fillRect(x+2*s,y+5*s,4*s,3*s);
+  ctx.fillRect(x+1*s,y+6*s,6*s,2*s);
   ctx.fillStyle = '#A0522D';
-  ctx.fillRect(x + 2*s, y + 3*s, 4*s, 2*s);
-  ctx.fillRect(x + 3*s, y + 2*s, 3*s, 1*s);
-
-  // Top swirl
+  ctx.fillRect(x+2*s,y+3*s,4*s,2*s);
+  ctx.fillRect(x+3*s,y+2*s,3*s,1*s);
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(x + 3*s, y + 1*s, 2*s, 1*s);
-  ctx.fillRect(x + 4*s, y + 0*s, 1*s, 1*s);
-
-  // Highlight
+  ctx.fillRect(x+3*s,y+1*s,2*s,1*s);
+  ctx.fillRect(x+4*s,y+0*s,1*s,1*s);
   ctx.fillStyle = '#D2691E';
-  ctx.fillRect(x + 2*s, y + 4*s, 1*s, 1*s);
-  ctx.fillRect(x + 3*s, y + 2*s, 1*s, 1*s);
-
-  // Eyes
+  ctx.fillRect(x+2*s,y+4*s,1*s,1*s);
+  ctx.fillRect(x+3*s,y+2*s,1*s,1*s);
   ctx.fillStyle = '#fff';
-  ctx.fillRect(x + 2*s, y + 4*s, 2*s, 1*s);
-  ctx.fillRect(x + 5*s, y + 4*s, 2*s, 1*s);
+  ctx.fillRect(x+2*s,y+4*s,2*s,1*s);
+  ctx.fillRect(x+5*s,y+4*s,2*s,1*s);
   ctx.fillStyle = '#000';
-  ctx.fillRect(x + 3*s, y + 4*s, 1*s, 1*s);
-  ctx.fillRect(x + 6*s, y + 4*s, 1*s, 1*s);
-
-  // Smile
+  ctx.fillRect(x+3*s,y+4*s,1*s,1*s);
+  ctx.fillRect(x+6*s,y+4*s,1*s,1*s);
   ctx.fillStyle = '#000';
-  ctx.fillRect(x + 3*s, y + 6*s, 3*s, 1*s);
-  ctx.fillRect(x + 2*s, y + 5*s, 1*s, 1*s);
-  ctx.fillRect(x + 6*s, y + 5*s, 1*s, 1*s);
-
-  ctx.restore();
+  ctx.fillRect(x+3*s,y+6*s,3*s,1*s);
+  ctx.fillRect(x+2*s,y+5*s,1*s,1*s);
+  ctx.fillRect(x+6*s,y+5*s,1*s,1*s);
 }
 
-function drawPixelToilet(x, y, size, direction) {
+function drawPixelToilet(x, y, size, dir) {
   const s = size / 10;
-  ctx.save();
-
-  // Base / bowl
   ctx.fillStyle = '#E8E8E8';
-  ctx.fillRect(x + 1*s, y + 5*s, 8*s, 4*s);
-  ctx.fillRect(x + 2*s, y + 4*s, 6*s, 1*s);
-  ctx.fillRect(x + 2*s, y + 9*s, 6*s, 1*s);
-
-  // Tank (back)
+  ctx.fillRect(x+1*s,y+5*s,8*s,4*s);
+  ctx.fillRect(x+2*s,y+4*s,6*s,1*s);
+  ctx.fillRect(x+2*s,y+9*s,6*s,1*s);
   ctx.fillStyle = '#D0D0D0';
-  if (direction > 0) {
-    ctx.fillRect(x + 0*s, y + 2*s, 3*s, 6*s);
-  } else {
-    ctx.fillRect(x + 7*s, y + 2*s, 3*s, 6*s);
-  }
-
-  // Lid
+  if (dir > 0) ctx.fillRect(x,y+2*s,3*s,6*s);
+  else ctx.fillRect(x+7*s,y+2*s,3*s,6*s);
   ctx.fillStyle = '#F0F0F0';
-  ctx.fillRect(x + 1*s, y + 3*s, 8*s, 2*s);
-
-  // Water inside
+  ctx.fillRect(x+1*s,y+3*s,8*s,2*s);
   ctx.fillStyle = '#4488CC';
-  ctx.fillRect(x + 2*s, y + 6*s, 6*s, 2*s);
-
-  // Handle
+  ctx.fillRect(x+2*s,y+6*s,6*s,2*s);
   ctx.fillStyle = '#C0C0C0';
-  if (direction > 0) {
-    ctx.fillRect(x + 0*s, y + 3*s, 1*s, 1*s);
-  } else {
-    ctx.fillRect(x + 9*s, y + 3*s, 1*s, 1*s);
-  }
-
-  // Outline
-  ctx.strokeStyle = '#666';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 1*s, y + 3*s, 8*s, 7*s);
-
-  ctx.restore();
+  if (dir > 0) ctx.fillRect(x,y+3*s,1*s,1*s);
+  else ctx.fillRect(x+9*s,y+3*s,1*s,1*s);
+  ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
+  ctx.strokeRect(x+1*s,y+3*s,8*s,7*s);
 }
 
 function drawToiletPaper(x, y, size) {
   const s = size / 8;
-  ctx.save();
-
-  // Roll
   ctx.fillStyle = '#F5F5F0';
-  ctx.fillRect(x + 1*s, y + 2*s, 6*s, 4*s);
-
-  // Center hole
+  ctx.fillRect(x+1*s,y+2*s,6*s,4*s);
   ctx.fillStyle = '#D2B48C';
-  ctx.fillRect(x + 3*s, y + 3*s, 2*s, 2*s);
-
-  // Trailing paper
+  ctx.fillRect(x+3*s,y+3*s,2*s,2*s);
   ctx.fillStyle = '#FAFAF5';
-  ctx.fillRect(x + 6*s, y + 3*s, 2*s, 2*s);
-  ctx.fillRect(x + 7*s, y + 4*s, 1*s, 2*s);
-
-  // Perforations
+  ctx.fillRect(x+6*s,y+3*s,2*s,2*s);
+  ctx.fillRect(x+7*s,y+4*s,1*s,2*s);
   ctx.fillStyle = '#DDD';
-  ctx.fillRect(x + 2*s, y + 2*s, 1*s, 1*s);
-  ctx.fillRect(x + 5*s, y + 2*s, 1*s, 1*s);
-  ctx.fillRect(x + 2*s, y + 5*s, 1*s, 1*s);
-  ctx.fillRect(x + 5*s, y + 5*s, 1*s, 1*s);
-
-  ctx.restore();
+  ctx.fillRect(x+2*s,y+2*s,1*s,1*s);
+  ctx.fillRect(x+5*s,y+2*s,1*s,1*s);
+  ctx.fillRect(x+2*s,y+5*s,1*s,1*s);
+  ctx.fillRect(x+5*s,y+5*s,1*s,1*s);
 }
 
 function drawRubberDucky(x, y, size) {
   const s = size / 8;
-  ctx.save();
-
-  // Body
   ctx.fillStyle = '#FFD700';
-  ctx.fillRect(x + 2*s, y + 3*s, 5*s, 4*s);
-  ctx.fillRect(x + 1*s, y + 4*s, 7*s, 2*s);
-
-  // Head
-  ctx.fillStyle = '#FFD700';
-  ctx.fillRect(x + 4*s, y + 1*s, 3*s, 3*s);
-
-  // Beak
+  ctx.fillRect(x+2*s,y+3*s,5*s,4*s);
+  ctx.fillRect(x+1*s,y+4*s,7*s,2*s);
+  ctx.fillRect(x+4*s,y+1*s,3*s,3*s);
   ctx.fillStyle = '#FF8C00';
-  ctx.fillRect(x + 7*s, y + 2*s, 1*s, 1*s);
-
-  // Eye
+  ctx.fillRect(x+7*s,y+2*s,1*s,1*s);
   ctx.fillStyle = '#000';
-  ctx.fillRect(x + 5*s, y + 2*s, 1*s, 1*s);
-
-  ctx.restore();
+  ctx.fillRect(x+5*s,y+2*s,1*s,1*s);
 }
 
 function drawPlunger(x, y, size) {
   const s = size / 8;
-  ctx.save();
-
-  // Stick
   ctx.fillStyle = '#C4A065';
-  ctx.fillRect(x + 3*s, y + 1*s, 2*s, 4*s);
-
-  // Cup
+  ctx.fillRect(x+3*s,y+1*s,2*s,4*s);
   ctx.fillStyle = '#8B0000';
-  ctx.fillRect(x + 1*s, y + 5*s, 6*s, 2*s);
-  ctx.fillRect(x + 2*s, y + 7*s, 4*s, 1*s);
-
-  // Highlight
+  ctx.fillRect(x+1*s,y+5*s,6*s,2*s);
+  ctx.fillRect(x+2*s,y+7*s,4*s,1*s);
   ctx.fillStyle = '#A52A2A';
-  ctx.fillRect(x + 2*s, y + 5*s, 1*s, 1*s);
-
-  ctx.restore();
+  ctx.fillRect(x+2*s,y+5*s,1*s,1*s);
 }
 
 function drawSplash(x, y, size, color) {
   const s = size / 8;
   ctx.fillStyle = color;
-  ctx.fillRect(x + 3*s, y + 0*s, 2*s, 1*s);
-  ctx.fillRect(x + 1*s, y + 1*s, 1*s, 1*s);
-  ctx.fillRect(x + 6*s, y + 1*s, 1*s, 1*s);
-  ctx.fillRect(x + 0*s, y + 3*s, 1*s, 2*s);
-  ctx.fillRect(x + 7*s, y + 3*s, 1*s, 2*s);
-  ctx.fillRect(x + 2*s, y + 2*s, 4*s, 4*s);
-  ctx.fillRect(x + 1*s, y + 6*s, 1*s, 1*s);
-  ctx.fillRect(x + 6*s, y + 6*s, 1*s, 1*s);
-  ctx.fillRect(x + 3*s, y + 7*s, 2*s, 1*s);
+  ctx.fillRect(x+3*s,y,2*s,1*s);
+  ctx.fillRect(x+1*s,y+1*s,1*s,1*s);
+  ctx.fillRect(x+6*s,y+1*s,1*s,1*s);
+  ctx.fillRect(x,y+3*s,1*s,2*s);
+  ctx.fillRect(x+7*s,y+3*s,1*s,2*s);
+  ctx.fillRect(x+2*s,y+2*s,4*s,4*s);
+  ctx.fillRect(x+1*s,y+6*s,1*s,1*s);
+  ctx.fillRect(x+6*s,y+6*s,1*s,1*s);
+  ctx.fillRect(x+3*s,y+7*s,2*s,1*s);
 }
 
 // ============================================================
@@ -500,198 +452,85 @@ function drawSplash(x, y, size, color) {
 // ============================================================
 
 function generateLane(rowIndex) {
-  // Pattern: safe -> mix of road/river -> safe zone every ~5 rows
-  const isSafe = (rowIndex % 5 === 0);
-
-  if (isSafe) {
-    return {
-      type: 'safe',
-      row: rowIndex,
-      color: '#2d5a1e',  // grass green
-      obstacles: [],
-      platforms: [],
-      speed: 0,
-      direction: 0
-    };
+  if (rowIndex % 5 === 0) {
+    return { type:'safe', row:rowIndex, color:'#2d5a1e', obstacles:[], platforms:[], speed:0, direction:0 };
   }
+  const difficulty = Math.min(rowIndex / 50, 1);
 
-  // Alternate between road and river with some randomness
-  const rand = Math.random();
-  const difficulty = Math.min(rowIndex / 50, 1); // increases over time
-
-  if (rand < 0.55) {
-    // ROAD lane with toilets
+  if (Math.random() < 0.55) {
     const dir = Math.random() < 0.5 ? 1 : -1;
-    const speed = (0.5 + Math.random() * 1.5 + difficulty * 1.0) * dir;
-    const numToilets = 2 + Math.floor(Math.random() * 3 + difficulty * 2);
-    const obstacles = [];
-
-    for (let i = 0; i < numToilets; i++) {
-      obstacles.push({
-        x: (i * (W / numToilets)) + Math.random() * 40 - 20,
-        width: TILE * (0.9 + Math.random() * 0.3),
-        type: Math.random() < 0.15 ? 'plunger' : 'toilet'
-      });
+    const speed = (0.5 + Math.random()*1.5 + difficulty) * dir;
+    const n = 2 + Math.floor(Math.random()*3 + difficulty*2);
+    const obs = [];
+    for (let i = 0; i < n; i++) {
+      obs.push({ x: i*(GW/n) + Math.random()*40-20, width: TILE*(0.9+Math.random()*0.3), type: Math.random()<0.15?'plunger':'toilet' });
     }
-
-    return {
-      type: 'road',
-      row: rowIndex,
-      color: '#444',
-      lineColor: '#666',
-      obstacles,
-      speed,
-      direction: dir
-    };
+    return { type:'road', row:rowIndex, color:'#444', lineColor:'#666', obstacles:obs, speed, direction:dir };
   } else {
-    // PEE RIVER with toilet paper / rubber ducky platforms
     const dir = Math.random() < 0.5 ? 1 : -1;
-    const speed = (0.3 + Math.random() * 1.0 + difficulty * 0.5) * dir;
-    const numPlatforms = 2 + Math.floor(Math.random() * 2);
-    const platforms = [];
-
-    for (let i = 0; i < numPlatforms; i++) {
-      const ptype = Math.random() < 0.3 ? 'ducky' : 'tp';
-      platforms.push({
-        x: i * (W / numPlatforms) + Math.random() * 30,
-        width: TILE * (1.2 + Math.random() * 1.5),
-        type: ptype
-      });
+    const speed = (0.3 + Math.random() + difficulty*0.5) * dir;
+    const n = 2 + Math.floor(Math.random()*2);
+    const plats = [];
+    for (let i = 0; i < n; i++) {
+      plats.push({ x: i*(GW/n)+Math.random()*30, width: TILE*(1.2+Math.random()*1.5), type: Math.random()<0.3?'ducky':'tp' });
     }
-
-    return {
-      type: 'river',
-      row: rowIndex,
-      color: '#CCAA00',  // pee yellow
-      waveOffset: Math.random() * 100,
-      platforms,
-      speed,
-      direction: dir
-    };
+    return { type:'river', row:rowIndex, color:'#CCAA00', waveOffset:Math.random()*100, platforms:plats, speed, direction:dir };
   }
 }
 
 function ensureLanes() {
-  // Generate lanes ahead of the player
-  const topRow = Math.floor(scrollOffset / TILE) - 2;
+  const topRow = Math.floor(scrollOffset/TILE) - 2;
   const bottomRow = topRow + VISIBLE_ROWS + 4;
-
-  while (rowsGenerated <= bottomRow + 10) {
-    lanes.push(generateLane(rowsGenerated));
-    rowsGenerated++;
-  }
-
-  // Clean up old lanes far behind
-  while (lanes.length > 0 && lanes[0].row < topRow - 5) {
-    lanes.shift();
-  }
+  while (rowsGenerated <= bottomRow + 10) { lanes.push(generateLane(rowsGenerated)); rowsGenerated++; }
+  while (lanes.length > 0 && lanes[0].row < topRow - 5) lanes.shift();
 }
 
 // ============================================================
 // RENDERING
 // ============================================================
 
-function getScreenY(worldRow) {
-  return H - (worldRow * TILE - scrollOffset) - TILE;
-}
+function screenY(row) { return GH - (row*TILE - scrollOffset) - TILE; }
 
 function drawLane(lane) {
-  const sy = getScreenY(lane.row);
-  if (sy < -TILE * 2 || sy > H + TILE) return;
+  const sy = screenY(lane.row);
+  if (sy < -TILE*2 || sy > GH+TILE) return;
 
   if (lane.type === 'safe') {
-    // Grass
     ctx.fillStyle = lane.color;
-    ctx.fillRect(0, sy, W, TILE);
-
-    // Pixel grass detail
+    ctx.fillRect(0,sy,GW,TILE);
     ctx.fillStyle = '#3a7a28';
-    for (let gx = 0; gx < COLS; gx++) {
-      if ((gx + lane.row) % 3 === 0) {
-        ctx.fillRect(gx * TILE + 4, sy + 4, 2, 4);
-        ctx.fillRect(gx * TILE + 14, sy + 10, 2, 3);
-      }
-      if ((gx + lane.row) % 5 === 0) {
-        ctx.fillRect(gx * TILE + 22, sy + 6, 2, 5);
-      }
+    for (let gx=0;gx<COLS;gx++) {
+      if ((gx+lane.row)%3===0) { ctx.fillRect(gx*TILE+4,sy+4,2,4); ctx.fillRect(gx*TILE+14,sy+10,2,3); }
+      if ((gx+lane.row)%5===0) ctx.fillRect(gx*TILE+22,sy+6,2,5);
     }
-
-    // Occasional flowers
-    if (lane.row % 10 === 0) {
-      ctx.fillStyle = '#FF69B4';
-      ctx.fillRect(3 * TILE + 8, sy + 8, 4, 4);
-      ctx.fillStyle = '#FF4500';
-      ctx.fillRect(9 * TILE + 12, sy + 10, 4, 4);
+    if (lane.row%10===0) {
+      ctx.fillStyle='#FF69B4'; ctx.fillRect(3*TILE+8,sy+8,4,4);
+      ctx.fillStyle='#FF4500'; ctx.fillRect(9*TILE+12,sy+10,4,4);
     }
-
   } else if (lane.type === 'road') {
-    // Road surface
-    ctx.fillStyle = lane.color;
-    ctx.fillRect(0, sy, W, TILE);
-
-    // Road lines (dashed)
-    ctx.fillStyle = lane.lineColor;
-    ctx.fillRect(0, sy, W, 1);
-    ctx.fillRect(0, sy + TILE - 1, W, 1);
-
-    // Center dashes
+    ctx.fillStyle = lane.color; ctx.fillRect(0,sy,GW,TILE);
+    ctx.fillStyle = lane.lineColor; ctx.fillRect(0,sy,GW,1); ctx.fillRect(0,sy+TILE-1,GW,1);
     ctx.fillStyle = '#888';
-    for (let dx = 0; dx < W; dx += 24) {
-      ctx.fillRect(dx + ((frameCount * Math.abs(lane.speed) * 0.5) % 24), sy + TILE/2 - 1, 12, 2);
+    for (let dx=0;dx<GW;dx+=24) ctx.fillRect(dx+((frameCount*Math.abs(lane.speed)*0.5)%24),sy+TILE/2-1,12,2);
+    ctx.fillStyle = '#777'; ctx.fillRect(0,sy,GW,2); ctx.fillRect(0,sy+TILE-2,GW,2);
+    for (const o of lane.obstacles) {
+      if (o.type==='plunger') drawPlunger(o.x,sy+2,TILE-4);
+      else drawPixelToilet(o.x,sy+1,TILE-2,lane.direction);
     }
-
-    // Sidewalk edges
-    ctx.fillStyle = '#777';
-    ctx.fillRect(0, sy, W, 2);
-    ctx.fillRect(0, sy + TILE - 2, W, 2);
-
-    // Draw toilet obstacles
-    for (const obs of lane.obstacles) {
-      if (obs.type === 'plunger') {
-        drawPlunger(obs.x, sy + 2, TILE - 4);
-      } else {
-        drawPixelToilet(obs.x, sy + 1, TILE - 2, lane.direction);
-      }
-    }
-
-  } else if (lane.type === 'river') {
-    // Pee river background
-    ctx.fillStyle = lane.color;
-    ctx.fillRect(0, sy, W, TILE);
-
-    // Animated wave pattern
-    const wavePhase = frameCount * 0.05 + lane.waveOffset;
+  } else {
+    ctx.fillStyle = lane.color; ctx.fillRect(0,sy,GW,TILE);
+    const wp = frameCount*0.05+lane.waveOffset;
     ctx.fillStyle = '#DDBB00';
-    for (let wx = 0; wx < W; wx += 8) {
-      const wy = Math.sin(wavePhase + wx * 0.1) * 2;
-      ctx.fillRect(wx, sy + 10 + wy, 6, 2);
-      ctx.fillRect(wx + 4, sy + 20 + wy * 0.7, 5, 2);
-    }
-
-    // Darker wave accents
+    for (let wx=0;wx<GW;wx+=8) { const wy=Math.sin(wp+wx*0.1)*2; ctx.fillRect(wx,sy+10+wy,6,2); ctx.fillRect(wx+4,sy+20+wy*0.7,5,2); }
     ctx.fillStyle = '#BB9900';
-    for (let wx = 0; wx < W; wx += 16) {
-      const wy = Math.cos(wavePhase + wx * 0.08) * 3;
-      ctx.fillRect(wx + 2, sy + 6 + wy, 4, 2);
-    }
-
-    // Bubbles
+    for (let wx=0;wx<GW;wx+=16) { const wy=Math.cos(wp+wx*0.08)*3; ctx.fillRect(wx+2,sy+6+wy,4,2); }
     ctx.fillStyle = '#EEDD44';
-    for (let bx = 0; bx < W; bx += 40) {
-      const by = Math.sin(wavePhase * 1.3 + bx) * 4;
-      ctx.fillRect(bx + 10, sy + 14 + by, 3, 3);
-    }
-
-    // Draw platforms (toilet paper / ducky)
-    for (const plat of lane.platforms) {
-      const pw = plat.width;
-      const numSegments = Math.ceil(pw / TILE);
-      for (let s = 0; s < numSegments; s++) {
-        if (plat.type === 'ducky') {
-          drawRubberDucky(plat.x + s * TILE, sy + 2, TILE - 4);
-        } else {
-          drawToiletPaper(plat.x + s * TILE, sy + 2, TILE - 4);
-        }
+    for (let bx=0;bx<GW;bx+=40) { const by=Math.sin(wp*1.3+bx)*4; ctx.fillRect(bx+10,sy+14+by,3,3); }
+    for (const p of lane.platforms) {
+      const segs = Math.ceil(p.width/TILE);
+      for (let s=0;s<segs;s++) {
+        if (p.type==='ducky') drawRubberDucky(p.x+s*TILE,sy+2,TILE-4);
+        else drawToiletPaper(p.x+s*TILE,sy+2,TILE-4);
       }
     }
   }
@@ -699,66 +538,54 @@ function drawLane(lane) {
 
 function drawPlayer() {
   if (player.dead) return;
-
-  const px = player.col * TILE + player.x;
-  const py = getScreenY(player.row) + player.y;
-
-  // Shadow
+  const px = player.col*TILE + player.x;
+  const py = screenY(player.row) + player.y;
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fillRect(px + 4, py + TILE - 4, TILE - 8, 4);
-
-  drawPixelPoop(px + 2, py + 2, TILE - 4);
+  ctx.fillRect(px+4,py+TILE-4,TILE-8,4);
+  drawPixelPoop(px+2,py+2,TILE-4);
 }
 
 function drawDeathEffect() {
   if (deathTimer <= 0) return;
-  const px = player.col * TILE + player.x;
-  const py = getScreenY(player.row) + player.y;
-
-  // Splash effect
-  const progress = 1 - (deathTimer / 60);
-  const alpha = 1 - progress;
-  ctx.globalAlpha = alpha;
-  const splashSize = TILE + progress * 20;
-  drawSplash(px - 4, py - 4, splashSize, '#8B4513');
+  const px = player.col*TILE + player.x;
+  const py = screenY(player.row) + player.y;
+  const progress = 1-(deathTimer/60);
+  ctx.globalAlpha = 1-progress;
+  drawSplash(px-4,py-4,TILE+progress*20,'#8B4513');
   ctx.globalAlpha = 1;
+  for (const p of particles) { ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); }
+}
 
-  // Flying particles
-  for (const p of particles) {
-    ctx.fillStyle = p.color;
-    ctx.fillRect(p.x, p.y, p.size, p.size);
-  }
+function drawHUD() {
+  ctx.save();
+  ctx.font = '10px "Press Start 2P", monospace';
+  // Score
+  ctx.fillStyle = '#000'; ctx.fillText('SCORE: '+score, 9, 15);
+  ctx.fillStyle = '#ffcc00'; ctx.fillText('SCORE: '+score, 8, 14);
+  // Hi
+  const hiText = 'HI: '+hiScore;
+  const hiW = ctx.measureText(hiText).width;
+  ctx.fillStyle = '#000'; ctx.fillText(hiText, GW-hiW-7, 15);
+  ctx.fillStyle = '#ff6600'; ctx.fillText(hiText, GW-hiW-8, 14);
+  // Lives
+  ctx.font = '12px sans-serif';
+  let lx = 8;
+  for (let i=0;i<lives;i++) { ctx.fillText('💩', lx, 30); lx += 18; }
+  ctx.restore();
 }
 
 function drawScanlines() {
-  ctx.fillStyle = 'rgba(0,0,0,0.08)';
-  for (let sy = 0; sy < H; sy += 3) {
-    ctx.fillRect(0, sy, W, 1);
-  }
-}
-
-function drawVignette() {
-  const gradient = ctx.createRadialGradient(W/2, H/2, W * 0.3, W/2, H/2, W * 0.75);
-  gradient.addColorStop(0, 'rgba(0,0,0,0)');
-  gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  for (let y=0;y<GH;y+=3) ctx.fillRect(0,y,GW,1);
 }
 
 function render() {
-  // Clear
-  ctx.fillStyle = '#1a1a2e';
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw all visible lanes
-  for (const lane of lanes) {
-    drawLane(lane);
-  }
-
+  ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0,0,GW,GH);
+  for (const l of lanes) drawLane(l);
   drawPlayer();
   drawDeathEffect();
+  drawHUD();
   drawScanlines();
-  drawVignette();
 }
 
 // ============================================================
@@ -767,350 +594,202 @@ function render() {
 
 function updateObstacles() {
   for (const lane of lanes) {
-    if (lane.type === 'road') {
-      for (const obs of lane.obstacles) {
-        obs.x += lane.speed;
-        // Wrap around
-        if (lane.speed > 0 && obs.x > W + TILE) obs.x = -obs.width;
-        if (lane.speed < 0 && obs.x < -obs.width) obs.x = W + TILE;
-      }
-    } else if (lane.type === 'river') {
-      for (const plat of lane.platforms) {
-        plat.x += lane.speed;
-        if (lane.speed > 0 && plat.x > W + TILE) plat.x = -plat.width;
-        if (lane.speed < 0 && plat.x < -plat.width) plat.x = W + TILE;
-      }
+    const items = lane.type==='road' ? lane.obstacles : lane.type==='river' ? lane.platforms : null;
+    if (!items) continue;
+    for (const o of items) {
+      o.x += lane.speed;
+      if (lane.speed>0 && o.x > GW+TILE) o.x = -o.width;
+      if (lane.speed<0 && o.x < -o.width) o.x = GW+TILE;
     }
   }
 }
 
-function getLane(row) {
-  return lanes.find(l => l.row === row);
-}
+function getLane(row) { return lanes.find(l => l.row === row); }
 
 function checkCollisions() {
   if (player.dead) return;
-
   const lane = getLane(player.row);
   if (!lane) return;
-
-  const px = player.col * TILE + player.x;
-  const pw = TILE - 8;
-  const playerLeft = px + 4;
-  const playerRight = px + pw + 4;
+  const px = player.col*TILE + player.x;
+  const pL = px+4, pR = px+TILE-4;
 
   if (lane.type === 'road') {
-    for (const obs of lane.obstacles) {
-      const obsLeft = obs.x;
-      const obsRight = obs.x + obs.width;
-      if (playerRight > obsLeft + 4 && playerLeft < obsRight - 4) {
-        killPlayer();
-        return;
-      }
+    for (const o of lane.obstacles) {
+      if (pR > o.x+4 && pL < o.x+o.width-4) { killPlayer(); return; }
     }
   } else if (lane.type === 'river') {
-    let onPlatform = false;
-    player.riding = null;
-    for (const plat of lane.platforms) {
-      const platLeft = plat.x;
-      const platRight = plat.x + plat.width;
-      if (playerRight > platLeft + 4 && playerLeft < platRight - 4) {
-        onPlatform = true;
-        player.riding = { platform: plat, lane };
-        break;
-      }
+    let on = false; player.riding = null;
+    for (const p of lane.platforms) {
+      if (pR > p.x+4 && pL < p.x+p.width-4) { on=true; player.riding={platform:p,lane}; break; }
     }
-    if (!onPlatform) {
-      killPlayer();
-      return;
-    }
+    if (!on) { killPlayer(); return; }
   }
-
-  // Check out of bounds horizontally
-  if (px < -TILE/2 || px > W - TILE/2) {
-    killPlayer();
-  }
+  if (px < -TILE/2 || px > GW-TILE/2) killPlayer();
 }
 
 function killPlayer() {
   if (player.dead) return;
-  player.dead = true;
-  deathTimer = 60;
+  player.dead = true; deathTimer = 60;
   playSound('die');
-
-  // Create particles
-  const px = player.col * TILE + player.x + TILE/2;
-  const py = getScreenY(player.row) + TILE/2;
+  const cx = player.col*TILE+player.x+TILE/2, cy = screenY(player.row)+TILE/2;
   particles = [];
-  for (let i = 0; i < 12; i++) {
-    particles.push({
-      x: px, y: py,
-      vx: (Math.random() - 0.5) * 5,
-      vy: (Math.random() - 0.5) * 5 - 2,
-      size: 2 + Math.random() * 4,
-      color: ['#8B4513', '#A0522D', '#D2691E', '#654321'][Math.floor(Math.random()*4)]
-    });
-  }
-
+  const colors = ['#8B4513','#A0522D','#D2691E','#654321'];
+  for (let i=0;i<12;i++) particles.push({ x:cx, y:cy, vx:(Math.random()-0.5)*5, vy:(Math.random()-0.5)*5-2, size:2+Math.random()*4, color:colors[Math.floor(Math.random()*4)] });
   lives--;
 }
 
 function respawnPlayer() {
-  player.dead = false;
-  player.riding = null;
-  player.x = 0;
-  player.y = 0;
-
-  // Find closest safe lane near current scroll position
-  const centerRow = Math.floor(scrollOffset / TILE) + VISIBLE_ROWS / 2;
-  let bestLane = null;
-  let bestDist = Infinity;
-  for (const lane of lanes) {
-    if (lane.type === 'safe') {
-      const dist = Math.abs(lane.row - centerRow);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestLane = lane;
-      }
-    }
-  }
-  if (bestLane) {
-    player.row = bestLane.row;
-    player.col = 6;
-  }
+  player.dead=false; player.riding=null; player.x=0; player.y=0;
+  const center = Math.floor(scrollOffset/TILE)+VISIBLE_ROWS/2;
+  let best=null, bd=Infinity;
+  for (const l of lanes) { if (l.type==='safe') { const d=Math.abs(l.row-center); if(d<bd){bd=d;best=l;} } }
+  if (best) { player.row=best.row; player.col=6; }
 }
 
 function movePlayer(dx, dy) {
   if (player.dead || gameState !== 'playing') return;
-
-  const newCol = player.col + dx;
-  const newRow = player.row + dy;
-
-  // Horizontal bounds
-  if (newCol < 0 || newCol >= COLS) return;
-
-  player.col = newCol;
-  player.row = newRow;
-  player.x = 0;
-  player.y = 0;
-  player.riding = null;
-
+  const nc = player.col+dx, nr = player.row+dy;
+  if (nc<0||nc>=COLS) return;
+  player.col=nc; player.row=nr; player.x=0; player.y=0; player.riding=null;
   playSound('hop');
-
-  // Score for moving forward
-  if (newRow > furthestRow) {
-    const diff = newRow - furthestRow;
-    score += diff * 10;
-    furthestRow = newRow;
-    if (diff > 0) playSound('score');
-  }
-
-  updateUI();
-}
-
-function updateUI() {
-  document.getElementById('score-display').textContent = 'SCORE: ' + score;
-  document.getElementById('hi-score-display').textContent = 'HI: ' + hiScore;
-
-  let livesText = '';
-  for (let i = 0; i < lives; i++) livesText += '💩 ';
-  document.getElementById('lives-display').textContent = livesText;
+  if (nr > furthestRow) { score += (nr-furthestRow)*10; furthestRow=nr; playSound('score'); }
 }
 
 // ============================================================
-// MAIN GAME LOOP
+// GAME LOOP
 // ============================================================
 
 function update() {
   frameCount++;
-
   if (gameState !== 'playing') return;
-
   ensureLanes();
   updateObstacles();
-
-  // Riding platform movement
-  if (player.riding && !player.dead) {
-    player.x += player.riding.lane.speed;
-  }
-
-  // Smooth scroll to follow player
-  const targetScroll = (player.row - VISIBLE_ROWS * 0.35) * TILE;
-  if (targetScroll > scrollOffset) {
-    scrollOffset += (targetScroll - scrollOffset) * 0.1;
-  }
-
-  // Auto-scroll slowly pushes forward
+  if (player.riding && !player.dead) player.x += player.riding.lane.speed;
+  const ts = (player.row - VISIBLE_ROWS*0.35)*TILE;
+  if (ts > scrollOffset) scrollOffset += (ts-scrollOffset)*0.1;
   scrollOffset += targetScrollSpeed;
-  targetScrollSpeed = 0.4 + Math.min(score / 2000, 1.0);
-
-  // Check if player is pushed off screen (bottom)
-  const playerScreenY = getScreenY(player.row);
-  if (playerScreenY > H + TILE && !player.dead) {
-    killPlayer();
-  }
-
+  targetScrollSpeed = 0.4 + Math.min(score/2000, 1);
+  if (screenY(player.row) > GH+TILE && !player.dead) killPlayer();
   checkCollisions();
-
-  // Death timer
   if (player.dead) {
     deathTimer--;
-    for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.15;
-    }
+    for (const p of particles) { p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; }
     if (deathTimer <= 0) {
       if (lives <= 0) {
-        gameState = 'gameover';
-        playSound('gameover');
-        if (score > hiScore) {
-          hiScore = score;
-          localStorage.setItem('pooper-hi', hiScore.toString());
-          document.getElementById('new-hi').style.display = 'block';
-        }
-        document.getElementById('final-score').textContent = 'SCORE: ' + score;
-        document.getElementById('game-over-screen').style.display = 'flex';
-      } else {
-        respawnPlayer();
-      }
+        gameState = 'gameover'; playSound('gameover');
+        if (score > hiScore) { hiScore=score; localStorage.setItem('pooper-hi',''+hiScore); document.getElementById('new-hi').classList.remove('hidden'); }
+        document.getElementById('final-score').textContent = 'SCORE: '+score;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+      } else respawnPlayer();
     }
   }
 }
 
-function gameLoop() {
-  update();
-  render();
-  updateUI();
-  requestAnimationFrame(gameLoop);
-}
+function gameLoop() { update(); render(); requestAnimationFrame(gameLoop); }
 
 function startGame() {
-  score = 0;
-  lives = 3;
-  furthestRow = 0;
-  scrollOffset = 0;
-  targetScrollSpeed = 0.4;
-  rowsGenerated = 0;
-  lanes = [];
-  particles = [];
-  deathTimer = 0;
-  player = { col: 6, row: 0, x: 0, y: 0, riding: null, dead: false };
-
-  // Generate initial lanes
-  for (let i = 0; i < VISIBLE_ROWS + 20; i++) {
-    lanes.push(generateLane(i));
-    rowsGenerated = i + 1;
-  }
-  // Force row 0 to be safe
-  lanes[0].type = 'safe';
-  lanes[0].color = '#2d5a1e';
-
+  score=0; lives=3; furthestRow=0; scrollOffset=0; targetScrollSpeed=0.4; rowsGenerated=0;
+  lanes=[]; particles=[]; deathTimer=0;
+  player = { col:6, row:0, x:0, y:0, riding:null, dead:false };
+  for (let i=0;i<VISIBLE_ROWS+20;i++) { lanes.push(generateLane(i)); rowsGenerated=i+1; }
+  lanes[0].type='safe'; lanes[0].color='#2d5a1e';
   gameState = 'playing';
-  document.getElementById('title-screen').style.display = 'none';
-  document.getElementById('game-over-screen').style.display = 'none';
-  document.getElementById('new-hi').style.display = 'none';
-
-  updateUI();
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('game-over-screen').classList.add('hidden');
+  document.getElementById('new-hi').classList.add('hidden');
 }
 
 // ============================================================
-// INPUT HANDLING
+// INPUT  –  touch-first
 // ============================================================
 
-const keys = {};
+// ---- Overlays: tap to start / retry ----
+function onOverlayTap(e) {
+  e.preventDefault(); e.stopPropagation();
+  initAudio();
+  startGame();
+}
+// Use touchend (not click) so iOS Safari fires it immediately
+['title-screen','game-over-screen'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('touchend', onOverlayTap, { passive: false });
+  el.addEventListener('click', onOverlayTap); // fallback for mouse / desktop
+});
 
+// ---- D-Pad buttons ----
+const dpadMap = { 'btn-up':[0,1], 'btn-down':[0,-1], 'btn-left':[-1,0], 'btn-right':[1,0] };
+Object.keys(dpadMap).forEach(id => {
+  const btn = document.getElementById(id);
+  const handler = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    initAudio();
+    if (gameState === 'title' || gameState === 'gameover') { startGame(); return; }
+    movePlayer(dpadMap[id][0], dpadMap[id][1]);
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 120);
+  };
+  btn.addEventListener('touchstart', handler, { passive: false });
+  btn.addEventListener('mousedown', handler);
+});
+
+// ---- Swipe on game area ----
+let swipeId = null, swipeX = 0, swipeY = 0, swipeT = 0;
+
+document.getElementById('game-area').addEventListener('touchstart', (e) => {
+  // Ignore if an overlay is visible (handled separately)
+  if (gameState !== 'playing') return;
+  if (swipeId !== null) return; // only track one finger
+  const t = e.changedTouches[0];
+  swipeId = t.identifier;
+  swipeX = t.clientX;
+  swipeY = t.clientY;
+  swipeT = Date.now();
+  initAudio();
+}, { passive: true });
+
+document.getElementById('game-area').addEventListener('touchend', (e) => {
+  if (gameState !== 'playing') return;
+  for (let i=0;i<e.changedTouches.length;i++) {
+    const t = e.changedTouches[i];
+    if (t.identifier !== swipeId) continue;
+    swipeId = null;
+    const dx = t.clientX - swipeX;
+    const dy = t.clientY - swipeY;
+    const dt = Date.now() - swipeT;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    // Need at least 20px swipe within 400ms
+    if (dist < 20 || dt > 400) return;
+    if (Math.abs(dx) > Math.abs(dy)) movePlayer(dx>0?1:-1, 0);
+    else movePlayer(0, dy<0?1:-1);
+  }
+}, { passive: true });
+
+// ---- Keyboard (desktop fallback) ----
+const keys = {};
 document.addEventListener('keydown', (e) => {
   if (keys[e.code]) return;
   keys[e.code] = true;
-
   initAudio();
-
-  if (gameState === 'title' || gameState === 'gameover') {
-    if (e.code === 'Space' || e.code === 'Enter') {
-      startGame();
-    }
-    return;
-  }
-
-  if (gameState === 'playing') {
+  if (gameState==='title'||gameState==='gameover') { if(e.code==='Space'||e.code==='Enter') startGame(); return; }
+  if (gameState==='playing') {
     switch(e.code) {
-      case 'ArrowUp': case 'KeyW':
-        movePlayer(0, 1); break;
-      case 'ArrowDown': case 'KeyS':
-        movePlayer(0, -1); break;
-      case 'ArrowLeft': case 'KeyA':
-        movePlayer(-1, 0); break;
-      case 'ArrowRight': case 'KeyD':
-        movePlayer(1, 0); break;
+      case 'ArrowUp': case 'KeyW': movePlayer(0,1); break;
+      case 'ArrowDown': case 'KeyS': movePlayer(0,-1); break;
+      case 'ArrowLeft': case 'KeyA': movePlayer(-1,0); break;
+      case 'ArrowRight': case 'KeyD': movePlayer(1,0); break;
     }
   }
-
   e.preventDefault();
 });
+document.addEventListener('keyup', (e) => { keys[e.code]=false; });
 
-document.addEventListener('keyup', (e) => {
-  keys[e.code] = false;
-});
-
-// Touch / click for title/gameover
-document.getElementById('title-screen').addEventListener('click', () => {
-  initAudio();
-  startGame();
-});
-document.getElementById('game-over-screen').addEventListener('click', () => {
-  initAudio();
-  startGame();
-});
-
-// Mobile D-pad
-['btn-up', 'btn-down', 'btn-left', 'btn-right'].forEach(id => {
-  const btn = document.getElementById(id);
-  btn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    initAudio();
-    if (gameState !== 'playing') { startGame(); return; }
-    switch(id) {
-      case 'btn-up': movePlayer(0, 1); break;
-      case 'btn-down': movePlayer(0, -1); break;
-      case 'btn-left': movePlayer(-1, 0); break;
-      case 'btn-right': movePlayer(1, 0); break;
-    }
-  });
-});
-
-// Swipe support
-let touchStartX = 0, touchStartY = 0;
-canvas.addEventListener('touchstart', (e) => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-  initAudio();
-});
-
-canvas.addEventListener('touchend', (e) => {
-  if (gameState !== 'playing') return;
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  const threshold = 30;
-
-  if (Math.abs(dx) > Math.abs(dy)) {
-    if (Math.abs(dx) > threshold) {
-      movePlayer(dx > 0 ? 1 : -1, 0);
-    }
-  } else {
-    if (Math.abs(dy) > threshold) {
-      movePlayer(0, dy < 0 ? 1 : -1);
-    }
-  }
-});
+// ---- Prevent iOS pull-to-refresh / bounce ----
+document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
 
 // ============================================================
 // INIT
 // ============================================================
-
-updateUI();
 gameLoop();
-
 </script>
 </body>
 </html>
