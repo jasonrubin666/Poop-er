@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#1a1a2e"/>
+  <!-- Poop body -->
+  <ellipse cx="256" cy="380" rx="140" ry="90" fill="#8B4513"/>
+  <ellipse cx="256" cy="370" rx="130" ry="80" fill="#A0522D"/>
+  <!-- Middle swirl -->
+  <ellipse cx="256" cy="300" rx="100" ry="60" fill="#8B4513"/>
+  <ellipse cx="256" cy="290" rx="90" ry="50" fill="#A0522D"/>
+  <!-- Top swirl -->
+  <ellipse cx="270" cy="230" rx="65" ry="45" fill="#8B4513"/>
+  <ellipse cx="270" cy="222" rx="55" ry="38" fill="#A0522D"/>
+  <!-- Tip -->
+  <ellipse cx="280" cy="190" rx="30" ry="25" fill="#8B4513"/>
+  <ellipse cx="280" cy="185" rx="22" ry="18" fill="#A0522D"/>
+  <!-- Eyes -->
+  <ellipse cx="220" cy="310" rx="22" ry="26" fill="#fff"/>
+  <ellipse cx="300" cy="310" rx="22" ry="26" fill="#fff"/>
+  <circle cx="226" cy="314" r="10" fill="#000"/>
+  <circle cx="306" cy="314" r="10" fill="#000"/>
+  <circle cx="229" cy="310" r="4" fill="#fff"/>
+  <circle cx="309" cy="310" r="4" fill="#fff"/>
+  <!-- Smile -->
+  <path d="M230 360 Q256 390 282 360" stroke="#000" stroke-width="6" fill="none" stroke-linecap="round"/>
+</svg>
